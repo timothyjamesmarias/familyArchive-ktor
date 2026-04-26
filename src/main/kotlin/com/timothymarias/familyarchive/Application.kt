@@ -1,5 +1,6 @@
 package com.timothymarias.familyarchive
 
+import com.timothymarias.familyarchive.config.bootstrapAdminUser
 import com.timothymarias.familyarchive.config.configureAuth
 import com.timothymarias.familyarchive.config.configureCors
 import com.timothymarias.familyarchive.config.configureDatabase
@@ -29,4 +30,5 @@ fun Application.module() {
     configureCors()
     configureAuth()
     configureRouting()
+    bootstrapAdminUser()
 }
