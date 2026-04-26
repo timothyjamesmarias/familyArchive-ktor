@@ -1,0 +1,55 @@
+/* Admin-specific styles */
+@import '../../css/main.css';
+
+/* Uppy base styles - MUST be imported before custom styles */
+@import '@uppy/core/css/style.min.css';
+@import '@uppy/dashboard/css/style.min.css';
+
+/* Uppy custom styles */
+@import './uppy-custom.css';
+
+/* TinyMCE dark mode styles */
+@import './tinymce-dark.css';
+
+/* Admin typography - sans-serif everywhere */
+@layer base {
+  body {
+    @apply font-sans text-base leading-normal;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans;
+  }
+}
+
+/* Admin components */
+@layer components {
+  /* Admin buttons */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-150;
+  }
+
+  .btn-primary {
+    @apply btn bg-blue-600 text-white hover:bg-blue-700
+           dark:bg-blue-700 dark:hover:bg-blue-600;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-200 text-gray-700 hover:bg-gray-300
+           dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600;
+  }
+
+  /* Responsive table wrapper for mobile scrolling */
+  .table-responsive {
+    @apply overflow-x-auto -mx-4 sm:mx-0;
+  }
+
+  .table-responsive table {
+    @apply min-w-full;
+  }
+}

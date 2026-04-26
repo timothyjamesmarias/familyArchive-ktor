@@ -1,0 +1,275 @@
+/* TinyMCE Dark Mode Overrides */
+/* Apply dark theme to TinyMCE when dark mode is active */
+
+/* Hide promotional elements */
+.tox .tox-promotion {
+  display: none !important;
+}
+
+.dark .tox:not([dir='rtl']) .tox-editor-header {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .tox .tox-menubar,
+.dark .tox .tox-toolbar,
+.dark .tox .tox-toolbar__overflow,
+.dark .tox .tox-toolbar__primary {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* Menubar buttons (File, Edit, View, etc.) */
+.dark .tox .tox-mbtn {
+  color: #e5e7eb !important;
+  background-color: transparent !important;
+}
+
+.dark .tox .tox-mbtn:hover:not(:disabled) {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.dark .tox .tox-mbtn:focus:not(:disabled) {
+  background-color: #374151 !important;
+}
+
+.dark .tox .tox-mbtn--active {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.dark .tox .tox-mbtn__select-label {
+  color: #e5e7eb !important;
+}
+
+/* All toolbar buttons */
+.dark .tox .tox-tbtn {
+  color: #e5e7eb !important;
+  background: transparent !important;
+}
+
+.dark .tox .tox-tbtn:hover:not(:disabled) {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.dark .tox .tox-tbtn:focus:not(:disabled) {
+  background-color: #374151 !important;
+}
+
+.dark .tox .tox-tbtn--enabled,
+.dark .tox .tox-tbtn--enabled:hover {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.dark .tox .tox-tbtn:active {
+  background-color: #4b5563 !important;
+}
+
+.dark .tox .tox-tbtn svg {
+  fill: #e5e7eb !important;
+}
+
+.dark .tox .tox-tbtn--enabled svg {
+  fill: #f9fafb !important;
+}
+
+.dark .tox .tox-toolbar__group {
+  border-color: #374151 !important;
+}
+
+/* Split buttons */
+.dark .tox .tox-split-button {
+  border-color: transparent !important;
+}
+
+.dark .tox .tox-split-button:hover {
+  background-color: #374151 !important;
+  box-shadow: none !important;
+}
+
+.dark .tox .tox-split-button__chevron {
+  background-color: transparent !important;
+  color: #e5e7eb !important;
+}
+
+.dark .tox .tox-split-button__chevron:hover {
+  background-color: #4b5563 !important;
+}
+
+.dark .tox .tox-split-button:focus {
+  background-color: #374151 !important;
+}
+
+.dark .tox .tox-statusbar {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #9ca3af;
+}
+
+.dark .tox .tox-statusbar a,
+.dark .tox .tox-statusbar__path-item,
+.dark .tox .tox-statusbar__wordcount {
+  color: #9ca3af;
+}
+
+.dark .tox .tox-edit-area__iframe {
+  background-color: #1f2937;
+}
+
+/* Dropdowns and menus */
+.dark .tox .tox-menu {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark .tox .tox-collection__item {
+  color: #e5e7eb;
+}
+
+.dark .tox .tox-collection__item:hover {
+  background-color: #374151;
+}
+
+.dark .tox .tox-collection__item--active {
+  background-color: #374151;
+}
+
+.dark .tox .tox-collection--list .tox-collection__item--enabled {
+  background-color: #1f2937;
+  color: #e5e7eb;
+}
+
+/* Dialogs */
+.dark .tox .tox-dialog {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark .tox .tox-dialog__header {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+.dark .tox .tox-dialog__body {
+  color: #e5e7eb;
+}
+
+.dark .tox .tox-dialog__footer {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark .tox .tox-label,
+.dark .tox .tox-toolbar-label {
+  color: #e5e7eb;
+}
+
+.dark .tox .tox-textfield,
+.dark .tox .tox-textarea,
+.dark .tox .tox-selectfield select {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark .tox .tox-button {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark .tox .tox-button:hover {
+  background-color: #4b5563;
+}
+
+.dark .tox .tox-button--primary {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.dark .tox .tox-button--primary:hover {
+  background-color: #2563eb;
+}
+
+/* More button and icon styling */
+.dark .tox .tox-icon svg {
+  fill: #e5e7eb !important;
+}
+
+.dark .tox .tox-tbtn__select-label {
+  color: #e5e7eb !important;
+}
+
+.dark .tox .tox-toolbar__primary .tox-tbtn--bespoke .tox-tbtn__select-label {
+  color: #e5e7eb !important;
+}
+
+/* Disabled state */
+.dark .tox .tox-tbtn:disabled,
+.dark .tox .tox-tbtn:disabled:hover,
+.dark .tox .tox-tbtn--disabled,
+.dark .tox .tox-tbtn--disabled:hover {
+  background-color: transparent !important;
+  color: #6b7280 !important;
+  opacity: 0.5;
+}
+
+.dark .tox .tox-tbtn:disabled svg,
+.dark .tox .tox-tbtn--disabled svg {
+  fill: #6b7280 !important;
+}
+
+/* Color picker */
+.dark .tox .tox-swatch {
+  border-color: #4b5563;
+}
+
+/* Tooltips */
+.dark .tox .tox-pop__dialog {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .tox .tox-pop .tox-toolbar {
+  background-color: #1f2937 !important;
+}
+
+/* Insert toolbar (appears on empty lines) */
+.dark .tox .tox-pop .tox-tbtn--enabled {
+  background-color: #374151 !important;
+}
+
+/* Notification */
+.dark .tox .tox-notification {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #e5e7eb !important;
+}
+
+/* Tab navigation */
+.dark .tox .tox-dialog__body-nav-item {
+  color: #9ca3af !important;
+}
+
+.dark .tox .tox-dialog__body-nav-item--active {
+  color: #3b82f6 !important;
+  border-bottom-color: #3b82f6 !important;
+}
+
+/* Scrollbars */
+.dark .tox ::-webkit-scrollbar {
+  background-color: #1f2937;
+}
+
+.dark .tox ::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+}
+
+.dark .tox ::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}

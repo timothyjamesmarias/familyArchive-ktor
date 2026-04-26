@@ -1,0 +1,434 @@
+/**
+ * Custom Uppy styles for Family Archive
+ * Matches Tailwind design system with dark mode support
+ * All styles use raw CSS (not @apply) to ensure they work in production
+ */
+
+/* Main Dashboard Container */
+.uppy-Dashboard {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  border-width: 1px !important;
+  border-color: rgb(209 213 219) !important; /* gray-300 */
+  background-color: rgb(255 255 255) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.dark .uppy-Dashboard {
+  border-color: rgb(75 85 99) !important; /* gray-600 */
+  background-color: rgb(31 41 55) !important; /* gray-800 */
+}
+
+/* Inner container */
+.uppy-Dashboard-inner {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  background-color: transparent !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Drop area */
+.uppy-Dashboard-dropFilesHereHint {
+  color: rgb(55 65 81) !important; /* gray-700 */
+  border-color: rgb(59 130 246) !important; /* blue-500 */
+}
+
+.dark .uppy-Dashboard-dropFilesHereHint {
+  color: rgb(209 213 219) !important; /* gray-300 */
+  border-color: rgb(96 165 250) !important; /* blue-400 */
+}
+
+/* Add files area */
+.uppy-Dashboard-AddFiles {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  background-color: rgb(249 250 251) !important; /* gray-50 */
+  border-color: rgb(229 231 235) !important; /* gray-200 */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  min-height: 300px !important;
+  padding: 2rem !important;
+}
+
+.dark .uppy-Dashboard-AddFiles {
+  background-color: rgb(55 65 81) !important; /* gray-700 */
+  border-color: rgb(75 85 99) !important; /* gray-600 */
+}
+
+/* Add files title */
+.uppy-Dashboard-AddFiles-title {
+  color: rgb(17 24 39) !important; /* gray-900 */
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif !important;
+  font-size: 1.125rem !important; /* text-lg */
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.dark .uppy-Dashboard-AddFiles-title {
+  color: rgb(255 255 255) !important; /* white */
+}
+
+/* Note text */
+.uppy-Dashboard-note {
+  color: rgb(75 85 99) !important; /* gray-600 */
+  font-size: 0.875rem !important; /* text-sm */
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif !important;
+}
+
+.dark .uppy-Dashboard-note {
+  color: rgb(156 163 175) !important; /* gray-400 */
+}
+
+/* Browse button */
+.uppy-Dashboard-browse {
+  color: rgb(37 99 235) !important; /* blue-600 */
+  font-weight: 500 !important; /* font-medium */
+}
+
+.dark .uppy-Dashboard-browse {
+  color: rgb(96 165 250) !important; /* blue-400 */
+}
+
+.uppy-Dashboard-browse:hover {
+  color: rgb(29 78 216) !important; /* blue-700 */
+}
+
+.dark .uppy-Dashboard-browse:hover {
+  color: rgb(147 197 253) !important; /* blue-300 */
+}
+
+/* File list */
+.uppy-Dashboard-files {
+  background-color: transparent !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  padding: 1rem !important;
+}
+
+/* Individual file items */
+.uppy-Dashboard-Item {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  border-width: 1px !important;
+  border-color: rgb(229 231 235) !important; /* gray-200 */
+  background-color: rgb(255 255 255) !important;
+  margin-bottom: 0.5rem !important;
+  padding: 0.75rem !important;
+  overflow: hidden !important;
+}
+
+.dark .uppy-Dashboard-Item {
+  border-color: rgb(55 65 81) !important; /* gray-700 */
+  background-color: rgb(55 65 81) !important; /* gray-700 */
+}
+
+.uppy-Dashboard-Item-name {
+  color: rgb(17 24 39) !important; /* gray-900 */
+}
+
+.dark .uppy-Dashboard-Item-name {
+  color: rgb(243 244 246) !important; /* gray-100 */
+}
+
+.uppy-Dashboard-Item-status {
+  color: rgb(75 85 99) !important; /* gray-600 */
+}
+
+.dark .uppy-Dashboard-Item-status {
+  color: rgb(156 163 175) !important; /* gray-400 */
+}
+
+/* Progress bar */
+.uppy-Dashboard-Item-progress {
+  background-color: rgb(229 231 235) !important; /* gray-200 */
+}
+
+.dark .uppy-Dashboard-Item-progress {
+  background-color: rgb(75 85 99) !important; /* gray-600 */
+}
+
+.uppy-Dashboard-Item-progressIndicator {
+  background-color: rgb(59 130 246) !important; /* blue-500 */
+}
+
+.dark .uppy-Dashboard-Item-progressIndicator {
+  background-color: rgb(96 165 250) !important; /* blue-400 */
+}
+
+/* Action buttons */
+.uppy-Dashboard-Item-action {
+  color: rgb(75 85 99) !important; /* gray-600 */
+}
+
+.dark .uppy-Dashboard-Item-action {
+  color: rgb(156 163 175) !important; /* gray-400 */
+}
+
+.uppy-Dashboard-Item-action:hover {
+  color: rgb(17 24 39) !important; /* gray-900 */
+}
+
+.dark .uppy-Dashboard-Item-action:hover {
+  color: rgb(243 244 246) !important; /* gray-100 */
+}
+
+/* Remove button */
+.uppy-Dashboard-Item-action--remove {
+  color: rgb(220 38 38) !important; /* red-600 */
+}
+
+.dark .uppy-Dashboard-Item-action--remove {
+  color: rgb(248 113 113) !important; /* red-400 */
+}
+
+.uppy-Dashboard-Item-action--remove:hover {
+  color: rgb(185 28 28) !important; /* red-700 */
+}
+
+.dark .uppy-Dashboard-Item-action--remove:hover {
+  color: rgb(252 165 165) !important; /* red-300 */
+}
+
+/* Upload button - hidden because form submission handles upload */
+.uppy-StatusBar-actionBtn--upload {
+  display: none !important;
+}
+
+/* Cancel button */
+.uppy-StatusBar-actionBtn--cancel {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  color: rgb(55 65 81) !important; /* gray-700 */
+  font-weight: 500 !important; /* font-medium */
+  padding: 0.5rem 1rem !important;
+}
+
+.dark .uppy-StatusBar-actionBtn--cancel {
+  color: rgb(209 213 219) !important; /* gray-300 */
+}
+
+.uppy-StatusBar-actionBtn--cancel:hover {
+  color: rgb(17 24 39) !important; /* gray-900 */
+}
+
+.dark .uppy-StatusBar-actionBtn--cancel:hover {
+  color: rgb(243 244 246) !important; /* gray-100 */
+}
+
+/* Status bar */
+.uppy-StatusBar {
+  border-bottom-left-radius: 0.5rem !important; /* rounded-b-lg */
+  border-bottom-right-radius: 0.5rem !important;
+  border-top-width: 1px !important;
+  border-color: rgb(229 231 235) !important; /* gray-200 */
+  background-color: rgb(249 250 251) !important; /* gray-50 */
+}
+
+.dark .uppy-StatusBar {
+  border-color: rgb(55 65 81) !important; /* gray-700 */
+  background-color: rgb(55 65 81) !important; /* gray-700 */
+}
+
+.uppy-StatusBar-content {
+  color: rgb(55 65 81) !important; /* gray-700 */
+}
+
+.dark .uppy-StatusBar-content {
+  color: rgb(209 213 219) !important; /* gray-300 */
+}
+
+/* Status bar progress */
+.uppy-StatusBar-progress {
+  background-color: rgb(59 130 246) !important; /* blue-500 */
+}
+
+.dark .uppy-StatusBar-progress {
+  background-color: rgb(96 165 250) !important; /* blue-400 */
+}
+
+/* Informer (error/success messages) */
+.uppy-Informer {
+  border-radius: 0.5rem !important; /* rounded-lg */
+}
+
+.uppy-Informer[aria-label='error'] {
+  background-color: rgb(254 226 226) !important; /* red-100 */
+  color: rgb(153 27 27) !important; /* red-800 */
+}
+
+.dark .uppy-Informer[aria-label='error'] {
+  background-color: rgb(127 29 29) !important; /* red-900 */
+  color: rgb(254 202 202) !important; /* red-200 */
+}
+
+.uppy-Informer[aria-label='success'] {
+  background-color: rgb(220 252 231) !important; /* green-100 */
+  color: rgb(22 101 52) !important; /* green-800 */
+}
+
+.dark .uppy-Informer[aria-label='success'] {
+  background-color: rgb(20 83 45) !important; /* green-900 */
+  color: rgb(187 247 208) !important; /* green-200 */
+}
+
+/* File preview icons */
+.uppy-Dashboard-Item-previewIcon {
+  color: rgb(156 163 175) !important; /* gray-400 */
+}
+
+.dark .uppy-Dashboard-Item-previewIcon {
+  color: rgb(107 114 128) !important; /* gray-500 */
+}
+
+/* Preview wrapper */
+.uppy-Dashboard-Item-preview {
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Drag over state */
+.uppy-Dashboard--isDraggingOver .uppy-Dashboard-AddFiles {
+  border-color: rgb(59 130 246) !important; /* blue-500 */
+  background-color: rgb(239 246 255) !important; /* blue-50 */
+}
+
+.dark .uppy-Dashboard--isDraggingOver .uppy-Dashboard-AddFiles {
+  border-color: rgb(96 165 250) !important; /* blue-400 */
+  background-color: rgba(30 58 138 / 0.2) !important; /* blue-900/20 */
+}
+
+/* File type icon colors */
+.uppy-Dashboard-Item-previewIcon svg {
+  fill: rgb(107 114 128) !important; /* gray-500 */
+}
+
+.dark .uppy-Dashboard-Item-previewIcon svg {
+  fill: rgb(156 163 175) !important; /* gray-400 */
+}
+
+/* Image preview thumbnails */
+.uppy-Dashboard-Item-previewImg {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  max-width: 100% !important;
+  max-height: 200px !important;
+  object-fit: contain !important;
+}
+
+/* Focus states for accessibility */
+.uppy-Dashboard-browse:focus,
+.uppy-StatusBar-actionBtn:focus,
+.uppy-Dashboard-Item-action:focus {
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgb(59 130 246) !important; /* ring-2 ring-blue-500 */
+}
+
+.dark .uppy-Dashboard-browse:focus,
+.dark .uppy-StatusBar-actionBtn:focus,
+.dark .uppy-Dashboard-Item-action:focus {
+  box-shadow: 0 0 0 2px rgb(96 165 250) !important; /* ring-blue-400 */
+}
+
+/* Disabled state */
+.uppy-StatusBar-actionBtn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* File size text */
+.uppy-Dashboard-Item-statusSize {
+  color: rgb(107 114 128) !important; /* gray-500 */
+  font-size: 0.875rem !important; /* text-sm */
+}
+
+.dark .uppy-Dashboard-Item-statusSize {
+  color: rgb(156 163 175) !important; /* gray-400 */
+}
+
+/* Retry button */
+.uppy-StatusBar-actionBtn--retry {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  background-color: rgb(37 99 235) !important; /* blue-600 */
+  color: rgb(255 255 255) !important; /* white */
+  font-weight: 500 !important; /* font-medium */
+}
+
+.dark .uppy-StatusBar-actionBtn--retry {
+  background-color: rgb(59 130 246) !important; /* blue-500 */
+}
+
+.uppy-StatusBar-actionBtn--retry:hover {
+  background-color: rgb(29 78 216) !important; /* blue-700 */
+}
+
+.dark .uppy-StatusBar-actionBtn--retry:hover {
+  background-color: rgb(37 99 235) !important; /* blue-600 */
+}
+
+/* Done checkmark */
+.uppy-StatusBar-actionBtn--done {
+  border-radius: 0.5rem !important; /* rounded-lg */
+  background-color: rgb(22 163 74) !important; /* green-600 */
+  color: rgb(255 255 255) !important; /* white */
+  font-weight: 500 !important; /* font-medium */
+}
+
+.dark .uppy-StatusBar-actionBtn--done {
+  background-color: rgb(34 197 94) !important; /* green-500 */
+}
+
+.uppy-StatusBar-actionBtn--done:hover {
+  background-color: rgb(21 128 61) !important; /* green-700 */
+}
+
+.dark .uppy-StatusBar-actionBtn--done:hover {
+  background-color: rgb(22 163 74) !important; /* green-600 */
+}
+
+/* Processing state */
+.uppy-Dashboard-Item--isProcessing {
+  opacity: 0.75 !important;
+}
+
+/* Error state */
+.uppy-Dashboard-Item--isError {
+  border-color: rgb(252 165 165) !important; /* red-300 */
+}
+
+.dark .uppy-Dashboard-Item--isError {
+  border-color: rgb(185 28 28) !important; /* red-700 */
+}
+
+/* Complete state */
+.uppy-Dashboard-Item--isComplete {
+  border-color: rgb(134 239 172) !important; /* green-300 */
+}
+
+.dark .uppy-Dashboard-Item--isComplete {
+  border-color: rgb(21 128 61) !important; /* green-700 */
+}
+
+/* Loading spinner */
+.uppy-Dashboard-Item-progressIndicator svg {
+  color: rgb(37 99 235) !important; /* blue-600 */
+}
+
+.dark .uppy-Dashboard-Item-progressIndicator svg {
+  color: rgb(96 165 250) !important; /* blue-400 */
+}

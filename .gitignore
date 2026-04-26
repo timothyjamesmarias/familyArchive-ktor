@@ -1,0 +1,9 @@
+node_modules/
+.gradle/
+build/
+.idea/
+src/main/resources/static/dist/
+*.iml
+.env
+.env.local
+uploads/

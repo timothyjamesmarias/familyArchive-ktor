@@ -1,0 +1,91 @@
+/* Public-facing (front-end) styles - Paperwhite Design System */
+@import './main.css';
+
+/* Base Typography for public pages */
+@layer base {
+  body {
+    @apply font-sans text-lg leading-relaxed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif;
+  }
+}
+
+/* Custom Components - Paperwhite Design System */
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply px-5 py-2.5 rounded-md font-sans font-medium transition-colors duration-150;
+  }
+
+  .btn-primary {
+    @apply btn bg-transparent border border-stone-400 text-stone-700
+           hover:bg-stone-100 hover:border-stone-500
+           dark:border-stone-600 dark:text-stone-300 dark:hover:bg-stone-800;
+  }
+
+  .btn-secondary {
+    @apply text-stone-600 underline hover:text-stone-900 transition-colors
+           dark:text-stone-400 dark:hover:text-stone-100;
+  }
+
+  /* Links */
+  .link {
+    @apply text-sage-600 hover:underline transition-colors
+           dark:text-sage-400;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-stone-50 border border-stone-200 rounded-md p-6
+           dark:bg-stone-900 dark:border-stone-800;
+  }
+
+  .card-lg {
+    @apply card p-8;
+  }
+
+  /* Content container for articles */
+  .prose-article {
+    @apply font-serif text-xl leading-extra-relaxed text-stone-900
+           dark:text-stone-50 max-w-3xl mx-auto;
+  }
+
+  .prose-article h1 {
+    @apply text-4xl font-semibold leading-tight mb-6 text-stone-900 dark:text-stone-50;
+  }
+
+  .prose-article h2 {
+    @apply text-3xl font-semibold leading-snug mb-4 mt-8 text-stone-900 dark:text-stone-50;
+  }
+
+  .prose-article h3 {
+    @apply text-2xl font-semibold leading-snug mb-3 mt-6 text-stone-900 dark:text-stone-50;
+  }
+
+  .prose-article p {
+    @apply mb-6 text-stone-700 dark:text-stone-300;
+  }
+
+  .prose-article a {
+    @apply text-sage-600 hover:underline dark:text-sage-400;
+  }
+
+  .prose-article blockquote {
+    @apply border-l-4 border-stone-300 dark:border-stone-700 pl-6 italic text-stone-600 dark:text-stone-400;
+  }
+
+  .prose-article code {
+    @apply bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-sm font-mono;
+  }
+
+  .prose-article pre {
+    @apply bg-stone-100 dark:bg-stone-800 p-4 rounded overflow-x-auto;
+  }
+}
