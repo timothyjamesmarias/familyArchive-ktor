@@ -1,5 +1,8 @@
 package com.timothymarias.familyarchive.config
 
+import com.timothymarias.familyarchive.routes.adminRoutes
+import com.timothymarias.familyarchive.routes.apiRoutes
+import com.timothymarias.familyarchive.routes.publicRoutes
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -9,6 +12,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 
 fun Application.configureRouting() {
+    val isDevMode = environment.config.propertyOrNull("ktor.development")?.getString()?.toBoolean() ?: false
+    val tinymceApiKey = environment.config.propertyOrNull("app.tinymceApiKey")?.getString() ?: "no-api-key"
+
     routing {
         // Auth guard for route protection
         install(AuthGuard)
@@ -21,6 +27,13 @@ fun Application.configureRouting() {
             call.respondText("OK", ContentType.Text.Plain)
         }
 
-        // Routes will be added in Phase 5
+        // Public routes
+        publicRoutes(isDevMode)
+
+        // API routes
+        apiRoutes()
+
+        // Admin routes
+        adminRoutes(isDevMode, tinymceApiKey)
     }
 }

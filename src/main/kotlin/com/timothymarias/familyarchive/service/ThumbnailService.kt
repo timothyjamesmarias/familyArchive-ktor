@@ -94,3 +94,11 @@ data class ThumbnailResult(
     val path: String,
     val sizeSpec: String,
 )
+
+data class ThumbnailStats(
+    val totalArtifacts: Long,
+    val totalImageArtifacts: Long,
+    val withThumbnails: Long,
+    val withoutThumbnails: Long,
+    val tooLargeToProcess: Long = 0,
+)

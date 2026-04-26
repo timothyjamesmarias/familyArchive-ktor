@@ -17,4 +17,7 @@ data class Page<T>(
     val numberOfElements: Int get() = content.size
     val hasNext: Boolean get() = number < totalPages - 1
     val hasPrevious: Boolean get() = number > 0
+    val isFirst: Boolean get() = number == 0
+    val isLast: Boolean get() = number >= totalPages - 1
+    val isEmpty: Boolean get() = content.isEmpty()
 }
