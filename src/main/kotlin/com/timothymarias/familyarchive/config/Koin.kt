@@ -112,7 +112,7 @@ fun appModule(application: Application) = module {
     single { TranscriptionService(get()) }
     single { TranslationService(get()) }
     single { ThumbnailService(get()) }
-    single { ArtifactUploadService(get(), get(), get()) }
+    single { ArtifactUploadService(get(), get(), get(), getOrNull(), getOrNull()) }
     single { FamilyTreeService(get(), get(), get(), get()) }
     single { GedcomImporterService(get(), get(), get(), get(), get()) }
     single { FamilyTreeRelationshipService(get(), get(), get(), get()) }

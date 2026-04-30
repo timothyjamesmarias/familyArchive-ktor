@@ -1,10 +1,12 @@
 package com.timothymarias.familyarchive.service
 
+import com.timothymarias.familyarchive.jobs.ThumbnailGenerationJob
 import com.timothymarias.familyarchive.model.ArtifactType
 import com.timothymarias.familyarchive.repository.ArtifactFileRepository
 import com.timothymarias.familyarchive.repository.ArtifactRepository
 import com.timothymarias.familyarchive.service.storage.StorageService
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jobrunr.scheduling.JobScheduler
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 import java.util.UUID
@@ -20,6 +22,8 @@ class ArtifactUploadService(
     private val storageService: StorageService,
     private val artifactRepository: ArtifactRepository,
     private val artifactFileRepository: ArtifactFileRepository,
+    private val jobScheduler: JobScheduler? = null,
+    private val thumbnailGenerationJob: ThumbnailGenerationJob? = null,
 ) {
     private val logger = LoggerFactory.getLogger(ArtifactUploadService::class.java)
 
@@ -75,7 +79,12 @@ class ArtifactUploadService(
 
         logger.info("Uploaded artifact: $artifactId (${artifactType}) with ${files.size} file(s)")
 
-        // JobRunr thumbnail enqueue will be added in Phase 8
+        if (ArtifactService.shouldGenerateThumbnail(primaryFile.contentType) && jobScheduler != null && thumbnailGenerationJob != null) {
+            jobScheduler.enqueue {
+                thumbnailGenerationJob.generateThumbnail(artifactId, ThumbnailService.THUMBNAIL_MEDIUM, null)
+            }
+            logger.debug("Enqueued thumbnail generation for artifact $artifactId")
+        }
 
         return artifactId
     }
