@@ -2,13 +2,10 @@ package com.timothymarias.familyarchive.repository
 
 import com.timothymarias.familyarchive.database.Individuals
 import kotlinx.serialization.json.JsonElement
-import org.jetbrains.exposed.sql.LowerCase
-import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.lowerCase
@@ -81,20 +78,16 @@ class IndividualRepository {
         return Page(content, total, pageRequest.page, pageRequest.size)
     }
 
-    fun findAncestors(personId: Long, maxGenerations: Int): List<IndividualRecord> {
-        val results = mutableListOf<IndividualRecord>()
-        TransactionManager.current().exec(
+    fun findAncestors(personId: Long, maxGenerations: Int): List<IndividualRecord> =
+        execQuery(
             """
             WITH RECURSIVE ancestors AS (
                 SELECT i.id, i.gedcom_id, i.given_name, i.surname, i.sex, i.is_tree_root,
                        i.gedcom_raw_data, i.created_at, i.updated_at, i.last_imported_at, i.deleted_at,
                        0 as generation
                 FROM individuals i
-                WHERE i.id = $personId
-                AND i.deleted_at IS NULL
-
+                WHERE i.id = $personId AND i.deleted_at IS NULL
                 UNION ALL
-
                 SELECT i.id, i.gedcom_id, i.given_name, i.surname, i.sex, i.is_tree_root,
                        i.gedcom_raw_data, i.created_at, i.updated_at, i.last_imported_at, i.deleted_at,
                        a.generation + 1
@@ -102,39 +95,25 @@ class IndividualRepository {
                 INNER JOIN family_members fm ON fm.individual_id = i.id AND fm.deleted_at IS NULL
                 INNER JOIN family_members fm_child ON fm_child.family_id = fm.family_id AND fm_child.deleted_at IS NULL
                 INNER JOIN ancestors a ON a.id = fm_child.individual_id
-                WHERE fm.role IN ('FATHER', 'MOTHER')
-                AND fm_child.role = 'CHILD'
-                AND i.deleted_at IS NULL
-                AND a.generation < $maxGenerations
+                WHERE fm.role IN ('FATHER', 'MOTHER') AND fm_child.role = 'CHILD'
+                AND i.deleted_at IS NULL AND a.generation < $maxGenerations
             )
             SELECT DISTINCT id, gedcom_id, given_name, surname, sex, is_tree_root,
                    gedcom_raw_data, created_at, updated_at, last_imported_at, deleted_at
-            FROM ancestors
-            WHERE deleted_at IS NULL
-            ORDER BY id
+            FROM ancestors WHERE deleted_at IS NULL ORDER BY id
             """.trimIndent(),
-        ) { rs ->
-            while (rs.next()) {
-                results.add(rs.toIndividualRecord())
-            }
-        }
-        return results
-    }
+        )
 
-    fun findDescendants(personId: Long, maxGenerations: Int): List<IndividualRecord> {
-        val results = mutableListOf<IndividualRecord>()
-        TransactionManager.current().exec(
+    fun findDescendants(personId: Long, maxGenerations: Int): List<IndividualRecord> =
+        execQuery(
             """
             WITH RECURSIVE descendants AS (
                 SELECT i.id, i.gedcom_id, i.given_name, i.surname, i.sex, i.is_tree_root,
                        i.gedcom_raw_data, i.created_at, i.updated_at, i.last_imported_at, i.deleted_at,
                        0 as generation
                 FROM individuals i
-                WHERE i.id = $personId
-                AND i.deleted_at IS NULL
-
+                WHERE i.id = $personId AND i.deleted_at IS NULL
                 UNION ALL
-
                 SELECT i.id, i.gedcom_id, i.given_name, i.surname, i.sex, i.is_tree_root,
                        i.gedcom_raw_data, i.created_at, i.updated_at, i.last_imported_at, i.deleted_at,
                        d.generation + 1
@@ -142,28 +121,17 @@ class IndividualRepository {
                 INNER JOIN family_members fm ON fm.individual_id = i.id AND fm.deleted_at IS NULL
                 INNER JOIN family_members fm_parent ON fm_parent.family_id = fm.family_id AND fm_parent.deleted_at IS NULL
                 INNER JOIN descendants d ON d.id = fm_parent.individual_id
-                WHERE fm.role = 'CHILD'
-                AND fm_parent.role IN ('FATHER', 'MOTHER')
-                AND i.deleted_at IS NULL
-                AND d.generation < $maxGenerations
+                WHERE fm.role = 'CHILD' AND fm_parent.role IN ('FATHER', 'MOTHER')
+                AND i.deleted_at IS NULL AND d.generation < $maxGenerations
             )
             SELECT DISTINCT id, gedcom_id, given_name, surname, sex, is_tree_root,
                    gedcom_raw_data, created_at, updated_at, last_imported_at, deleted_at
-            FROM descendants
-            WHERE deleted_at IS NULL
-            ORDER BY id
+            FROM descendants WHERE deleted_at IS NULL ORDER BY id
             """.trimIndent(),
-        ) { rs ->
-            while (rs.next()) {
-                results.add(rs.toIndividualRecord())
-            }
-        }
-        return results
-    }
+        )
 
-    fun findSiblings(personId: Long): List<IndividualRecord> {
-        val results = mutableListOf<IndividualRecord>()
-        TransactionManager.current().exec(
+    fun findSiblings(personId: Long): List<IndividualRecord> =
+        execQuery(
             """
             SELECT DISTINCT i.id, i.gedcom_id, i.given_name, i.surname, i.sex, i.is_tree_root,
                    i.gedcom_raw_data, i.created_at, i.updated_at, i.last_imported_at, i.deleted_at
@@ -171,64 +139,36 @@ class IndividualRepository {
             INNER JOIN family_members fm ON fm.individual_id = i.id AND fm.deleted_at IS NULL
             WHERE fm.family_id IN (
                 SELECT fm2.family_id FROM family_members fm2
-                WHERE fm2.individual_id = $personId
-                AND fm2.role = 'CHILD'
-                AND fm2.deleted_at IS NULL
+                WHERE fm2.individual_id = $personId AND fm2.role = 'CHILD' AND fm2.deleted_at IS NULL
             )
-            AND fm.role = 'CHILD'
-            AND i.id != $personId
-            AND i.deleted_at IS NULL
+            AND fm.role = 'CHILD' AND i.id != $personId AND i.deleted_at IS NULL
             """.trimIndent(),
-        ) { rs ->
-            while (rs.next()) {
-                results.add(rs.toIndividualRecord())
-            }
-        }
-        return results
-    }
+        )
 
-    fun findMostRecentGenerationBySurname(surname: String): List<IndividualRecord> {
-        val results = mutableListOf<IndividualRecord>()
-        TransactionManager.current().exec(
+    fun findMostRecentGenerationBySurname(surname: String): List<IndividualRecord> =
+        execQuery(
             """
             SELECT DISTINCT i.id, i.gedcom_id, i.given_name, i.surname, i.sex, i.is_tree_root,
                    i.gedcom_raw_data, i.created_at, i.updated_at, i.last_imported_at, i.deleted_at
             FROM individuals i
             LEFT JOIN family_members fm ON fm.individual_id = i.id AND fm.deleted_at IS NULL
-            WHERE i.surname = '$surname'
-            AND i.deleted_at IS NULL
+            WHERE i.surname = '$surname' AND i.deleted_at IS NULL
             AND NOT EXISTS (
                 SELECT 1 FROM family_members fm2
-                WHERE fm2.individual_id = i.id
-                AND fm2.role IN ('FATHER', 'MOTHER')
-                AND fm2.deleted_at IS NULL
+                WHERE fm2.individual_id = i.id AND fm2.role IN ('FATHER', 'MOTHER') AND fm2.deleted_at IS NULL
             )
             ORDER BY i.id
             """.trimIndent(),
-        ) { rs ->
-            while (rs.next()) {
-                results.add(rs.toIndividualRecord())
-            }
-        }
-        return results
-    }
+        )
 
-    fun findMaxGedcomIdNumber(): Int? {
-        var result: Int? = null
-        TransactionManager.current().exec(
+    fun findMaxGedcomIdNumber(): Int? =
+        execScalar(
             """
             SELECT MAX(CAST(SUBSTRING(gedcom_id FROM '@I([0-9]+)@') AS INTEGER))
             FROM individuals
             WHERE gedcom_id ~ '@I[0-9]+@'
             """.trimIndent(),
-        ) { rs ->
-            if (rs.next()) {
-                result = rs.getInt(1)
-                if (rs.wasNull()) result = null
-            }
-        }
-        return result
-    }
+        )
 
     fun create(
         gedcomId: String?,
@@ -290,6 +230,33 @@ class IndividualRepository {
         deletedAt = this[Individuals.deletedAt],
     )
 
+    private fun execQuery(sql: String): List<IndividualRecord> {
+        val results = mutableListOf<IndividualRecord>()
+        val conn = TransactionManager.current().connection.connection as java.sql.Connection
+        conn.prepareStatement(sql).use { stmt ->
+            stmt.executeQuery().use { rs ->
+                while (rs.next()) {
+                    results.add(rs.toIndividualRecord())
+                }
+            }
+        }
+        return results
+    }
+
+    private fun execScalar(sql: String): Int? {
+        val conn = TransactionManager.current().connection.connection as java.sql.Connection
+        conn.prepareStatement(sql).use { stmt ->
+            stmt.executeQuery().use { rs ->
+                return if (rs.next()) {
+                    val value = rs.getInt(1)
+                    if (rs.wasNull()) null else value
+                } else {
+                    null
+                }
+            }
+        }
+    }
+
     private fun java.sql.ResultSet.toIndividualRecord(): IndividualRecord {
         val timestamp = { col: String -> getTimestamp(col)?.toLocalDateTime() }
         return IndividualRecord(
@@ -299,7 +266,7 @@ class IndividualRepository {
             surname = getString("surname"),
             sex = getString("sex")?.firstOrNull(),
             isTreeRoot = getBoolean("is_tree_root"),
-            gedcomRawData = null, // Raw SQL doesn't deserialize JSONB automatically
+            gedcomRawData = null,
             createdAt = timestamp("created_at")!!,
             updatedAt = timestamp("updated_at")!!,
             lastImportedAt = timestamp("last_imported_at"),

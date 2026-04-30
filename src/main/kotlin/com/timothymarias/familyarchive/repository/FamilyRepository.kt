@@ -95,20 +95,23 @@ class FamilyRepository {
     }
 
     fun findMaxGedcomIdNumber(): Int? {
-        var result: Int? = null
-        TransactionManager.current().exec(
+        val conn = TransactionManager.current().connection.connection as java.sql.Connection
+        conn.prepareStatement(
             """
             SELECT MAX(CAST(SUBSTRING(gedcom_id FROM '@F([0-9]+)@') AS INTEGER))
             FROM families
             WHERE gedcom_id ~ '@F[0-9]+@'
             """.trimIndent(),
-        ) { rs ->
-            if (rs.next()) {
-                result = rs.getInt(1)
-                if (rs.wasNull()) result = null
+        ).use { stmt ->
+            stmt.executeQuery().use { rs ->
+                return if (rs.next()) {
+                    val value = rs.getInt(1)
+                    if (rs.wasNull()) null else value
+                } else {
+                    null
+                }
             }
         }
-        return result
     }
 
     fun create(
