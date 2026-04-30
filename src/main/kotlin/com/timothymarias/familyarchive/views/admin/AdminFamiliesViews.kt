@@ -666,7 +666,7 @@ object AdminFamiliesViews {
                             ) {
                                 attributes["id"] = "gedcomId"
                                 name = "gedcomId"
-                                value = familyUpdateDto.gedcomId
+                                value = familyUpdateDto.gedcomId ?: ""
                             }
                         }
 

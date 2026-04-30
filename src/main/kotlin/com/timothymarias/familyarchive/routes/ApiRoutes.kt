@@ -2,6 +2,7 @@ package com.timothymarias.familyarchive.routes
 
 import com.timothymarias.familyarchive.service.AnnotationInput
 import com.timothymarias.familyarchive.service.AnnotationService
+import com.timothymarias.familyarchive.service.FamilyTreeRelationshipService
 import com.timothymarias.familyarchive.service.FamilyTreeService
 import com.timothymarias.familyarchive.service.IndividualService
 import io.ktor.http.HttpStatusCode
@@ -22,6 +23,7 @@ fun Route.apiRoutes() {
     val familyTreeService by inject<FamilyTreeService>()
     val individualService by inject<IndividualService>()
     val annotationService by inject<AnnotationService>()
+    val relationshipService by inject<FamilyTreeRelationshipService>()
 
     route("/api") {
         // Family tree read endpoints (public)
@@ -102,7 +104,36 @@ fun Route.apiRoutes() {
                 call.respond(mapOf("valid" to result.valid, "reason" to result.reason))
             }
 
-            // Relationship endpoints will be added when FamilyTreeRelationshipService is ported (Phase 8)
+            // Relationship endpoints
+            post("/relationships/child") {
+                val request = call.receive<com.timothymarias.familyarchive.service.AddChildRequest>()
+                val result = relationshipService.addChild(request)
+                call.respond(HttpStatusCode.Created, result)
+            }
+
+            post("/relationships/spouse") {
+                val request = call.receive<com.timothymarias.familyarchive.service.AddSpouseRequest>()
+                val result = relationshipService.addSpouse(request)
+                call.respond(HttpStatusCode.Created, result)
+            }
+
+            post("/relationships/parent") {
+                val request = call.receive<com.timothymarias.familyarchive.service.AddParentRequest>()
+                val result = relationshipService.addParent(request)
+                call.respond(HttpStatusCode.Created, result)
+            }
+
+            post("/relationships/link-existing-parent") {
+                val request = call.receive<com.timothymarias.familyarchive.service.LinkExistingParentRequest>()
+                val result = relationshipService.linkExistingParent(request)
+                call.respond(HttpStatusCode.Created, result)
+            }
+
+            post("/relationships/sibling") {
+                val request = call.receive<com.timothymarias.familyarchive.service.AddSiblingRequest>()
+                val result = relationshipService.addSibling(request)
+                call.respond(HttpStatusCode.Created, result)
+            }
         }
 
         // Individual endpoints

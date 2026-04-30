@@ -369,10 +369,238 @@ fun Route.adminRoutes(isDevMode: Boolean, tinymceApiKey: String) {
             }
         }
 
+        // ---- Individuals ----
+        route("/individuals") {
+            get {
+                val page = call.parameters["page"]?.toIntOrNull() ?: 0
+                val size = call.parameters["size"]?.toIntOrNull() ?: 20
+                val search = call.parameters["search"]
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val individuals = if (!search.isNullOrBlank()) {
+                    individualService.searchByNameOrGedcomId(search, PageRequest(page, size))
+                } else {
+                    individualService.findAll(PageRequest(page, size))
+                }
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminIndividualsViews.index(ctx, individuals, search),
+                    ContentType.Text.Html,
+                )
+            }
+
+            get("/new") {
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val allIndividuals = individualService.findAll(PageRequest(0, 10000)).content
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminIndividualsViews.`new`(ctx, allIndividuals),
+                    ContentType.Text.Html,
+                )
+            }
+
+            post {
+                val params = call.receiveParameters()
+                try {
+                    individualService.createFromRequest(
+                        com.timothymarias.familyarchive.service.IndividualRequest(
+                            givenName = params["givenName"],
+                            surname = params["surname"],
+                            sex = params["sex"],
+                            birthDate = params["birthDate"],
+                            birthPlace = params["birthPlace"],
+                            deathDate = params["deathDate"],
+                            deathPlace = params["deathPlace"],
+                        ),
+                    )
+                    call.redirectWithFlash("/admin/individuals", "success", "Individual created")
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/individuals/new", "error", e.message ?: "Failed to create")
+                }
+            }
+
+            get("/{id}") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@get call.respondRedirect("/admin/individuals")
+                val individual = individualService.findById(id) ?: return@get call.respondRedirect("/admin/individuals")
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val events = individualEventService.findByIndividualIdOrderByDate(id).map { event ->
+                    com.timothymarias.familyarchive.views.admin.EnrichedEvent(
+                        event = event,
+                        place = event.placeId?.let { placeService.findById(it) },
+                    )
+                }
+                val memberships = familyMemberService.findByIndividualId(id).map { member ->
+                    com.timothymarias.familyarchive.views.admin.EnrichedFamilyMembership(
+                        member = member,
+                        family = familyService.findById(member.familyId)!!,
+                    )
+                }
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminIndividualsViews.show(ctx, individual, events, memberships),
+                    ContentType.Text.Html,
+                )
+            }
+
+            get("/{id}/edit") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@get call.respondRedirect("/admin/individuals")
+                val individual = individualService.findById(id) ?: return@get call.respondRedirect("/admin/individuals")
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val allIndividuals = individualService.findAll(PageRequest(0, 10000)).content
+                val dto = com.timothymarias.familyarchive.dto.IndividualUpdateDto(
+                    gedcomId = individual.gedcomId,
+                    givenName = individual.givenName,
+                    surname = individual.surname,
+                    sex = individual.sex?.toString(),
+                    isTreeRoot = individual.isTreeRoot,
+                )
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminIndividualsViews.edit(ctx, individual, allIndividuals, dto),
+                    ContentType.Text.Html,
+                )
+            }
+
+            post("/{id}/update") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/individuals")
+                val params = call.receiveParameters()
+                try {
+                    individualService.updateFromRequest(
+                        id,
+                        com.timothymarias.familyarchive.service.IndividualRequest(
+                            givenName = params["givenName"],
+                            surname = params["surname"],
+                            sex = params["sex"],
+                            birthDate = params["birthDate"],
+                            birthPlace = params["birthPlace"],
+                            deathDate = params["deathDate"],
+                            deathPlace = params["deathPlace"],
+                        ),
+                    )
+                    call.redirectWithFlash("/admin/individuals/$id", "success", "Individual updated")
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/individuals/$id/edit", "error", e.message ?: "Failed to update")
+                }
+            }
+
+            post("/{id}/delete") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/individuals")
+                try {
+                    individualService.softDelete(id)
+                    call.redirectWithFlash("/admin/individuals", "success", "Individual deleted")
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/individuals/$id", "error", e.message ?: "Cannot delete")
+                }
+            }
+        }
+
+        // ---- Families ----
+        route("/families") {
+            get {
+                val page = call.parameters["page"]?.toIntOrNull() ?: 0
+                val size = call.parameters["size"]?.toIntOrNull() ?: 20
+                val search = call.parameters["search"]
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val familyRecords = if (!search.isNullOrBlank()) {
+                    familyService.searchByGedcomIdOrMembersOrPlace(search, PageRequest(page, size))
+                } else {
+                    familyService.findAll(PageRequest(page, size))
+                }
+                val familyRows = com.timothymarias.familyarchive.repository.Page(
+                    content = familyRecords.content.map { family ->
+                        val members = familyMemberService.findByFamilyId(family.id)
+                        val placeName = family.marriagePlaceId?.let { placeService.findById(it)?.name }
+                        com.timothymarias.familyarchive.views.admin.FamilyRowData(family, members.size, placeName)
+                    },
+                    totalElements = familyRecords.totalElements,
+                    number = familyRecords.number,
+                    size = familyRecords.size,
+                )
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminFamiliesViews.index(ctx, familyRows, search),
+                    ContentType.Text.Html,
+                )
+            }
+
+            get("/new") {
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminFamiliesViews.newFamily(ctx),
+                    ContentType.Text.Html,
+                )
+            }
+
+            post {
+                val params = call.receiveParameters()
+                try {
+                    familyService.create(
+                        gedcomId = params["gedcomId"]?.takeIf { it.isNotBlank() },
+                        marriageDateString = params["marriageDateString"]?.takeIf { it.isNotBlank() },
+                        marriagePlaceId = params["marriagePlaceId"]?.toLongOrNull(),
+                    )
+                    call.redirectWithFlash("/admin/families", "success", "Family created")
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/families/new", "error", e.message ?: "Failed to create")
+                }
+            }
+
+            get("/{id}") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@get call.respondRedirect("/admin/families")
+                val family = familyService.findById(id) ?: return@get call.respondRedirect("/admin/families")
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val members = familyMemberService.findByFamilyId(id).map { member ->
+                    com.timothymarias.familyarchive.views.admin.EnrichedFamilyMember(
+                        member = member,
+                        individual = individualService.findById(member.individualId)!!,
+                    )
+                }
+                val marriagePlace = family.marriagePlaceId?.let { placeService.findById(it) }
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminFamiliesViews.show(ctx, family, members, marriagePlace),
+                    ContentType.Text.Html,
+                )
+            }
+
+            get("/{id}/edit") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@get call.respondRedirect("/admin/families")
+                val family = familyService.findById(id) ?: return@get call.respondRedirect("/admin/families")
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val places = placeService.findAll(PageRequest(0, 10000)).content
+                val dto = com.timothymarias.familyarchive.dto.FamilyUpdateDto(
+                    gedcomId = family.gedcomId,
+                    marriageDateString = family.marriageDateString,
+                    marriagePlaceId = family.marriagePlaceId,
+                    divorceDateString = family.divorceDateString,
+                )
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminFamiliesViews.edit(ctx, family, places, dto),
+                    ContentType.Text.Html,
+                )
+            }
+
+            post("/{id}/update") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/families")
+                val params = call.receiveParameters()
+                try {
+                    familyService.update(
+                        id = id,
+                        marriageDateString = params["marriageDateString"]?.takeIf { it.isNotBlank() },
+                        marriageDateParsed = null,
+                        marriagePlaceId = params["marriagePlaceId"]?.toLongOrNull(),
+                        divorceDateString = params["divorceDateString"]?.takeIf { it.isNotBlank() },
+                        divorceDateParsed = null,
+                    )
+                    call.redirectWithFlash("/admin/families/$id", "success", "Family updated")
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/families/$id/edit", "error", e.message ?: "Failed to update")
+                }
+            }
+
+            post("/{id}/delete") {
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/families")
+                familyService.delete(id)
+                call.redirectWithFlash("/admin/families", "success", "Family deleted")
+            }
+        }
+
         // ---- System Utilities ----
         get("/system/utilities") {
             val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
-            // ThumbnailStats will be properly computed when ThumbnailBackfillService is ported (Phase 8)
             val stats = com.timothymarias.familyarchive.service.ThumbnailStats(0, 0, 0, 0, 0)
             call.respondText(
                 com.timothymarias.familyarchive.views.admin.AdminSystemUtilitiesViews.utilities(ctx, stats),

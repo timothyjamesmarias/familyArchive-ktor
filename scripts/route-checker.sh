@@ -76,6 +76,10 @@ ADMIN_ROUTES=(
     "/admin/places/new"
     "/admin/artifacts"
     "/admin/artifacts/upload"
+    "/admin/individuals"
+    "/admin/individuals/new"
+    "/admin/families"
+    "/admin/families/new"
     "/admin/system/utilities"
 )
 
