@@ -19,7 +19,12 @@ import com.timothymarias.familyarchive.service.ArtifactFileService
 import com.timothymarias.familyarchive.service.ArtifactService
 import com.timothymarias.familyarchive.service.ArtifactUploadService
 import com.timothymarias.familyarchive.service.FamilyTreeService
+import com.timothymarias.familyarchive.service.FamilyTreeRelationshipService
+import com.timothymarias.familyarchive.service.GedcomImporterService
+import com.timothymarias.familyarchive.service.GedcomImportJobService
+import com.timothymarias.familyarchive.service.ThumbnailBackfillService
 import com.timothymarias.familyarchive.service.CommentaryService
+import com.timothymarias.familyarchive.jobs.ThumbnailGenerationJob
 import com.timothymarias.familyarchive.service.FamilyMemberService
 import com.timothymarias.familyarchive.service.FamilyService
 import com.timothymarias.familyarchive.service.IndividualEventService
@@ -109,4 +114,26 @@ fun appModule(application: Application) = module {
     single { ThumbnailService(get()) }
     single { ArtifactUploadService(get(), get(), get()) }
     single { FamilyTreeService(get(), get()) }
+    single { GedcomImporterService(get(), get(), get(), get(), get()) }
+    single { FamilyTreeRelationshipService(get(), get(), get(), get()) }
+
+    // JobRunr (conditional on config)
+    val jobrunrEnabled = config.propertyOrNull("jobrunr.enabled")?.getString()?.toBoolean() ?: true
+    if (jobrunrEnabled) {
+        single<javax.sql.DataSource> { appDataSource }
+        single<org.jobrunr.storage.StorageProvider> {
+            org.jobrunr.storage.sql.common.SqlStorageProviderFactory.using(get<javax.sql.DataSource>())
+        }
+        single<org.jobrunr.scheduling.JobScheduler> {
+            val workerCount = config.propertyOrNull("jobrunr.workerCount")?.getString()?.toInt() ?: 4
+            org.jobrunr.configuration.JobRunr.configure()
+                .useStorageProvider(get())
+                .useBackgroundJobServerIf(true, workerCount)
+                .initialize()
+                .jobScheduler
+        }
+        single { ThumbnailGenerationJob(get(), get(), get()) }
+        single { ThumbnailBackfillService(get(), get(), get()) }
+        single { GedcomImportJobService(get(), get()) }
+    }
 }

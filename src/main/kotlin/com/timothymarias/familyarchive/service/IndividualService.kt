@@ -18,6 +18,7 @@ data class ValidationResult(val valid: Boolean, val reason: String?) {
     }
 }
 
+@kotlinx.serialization.Serializable
 data class IndividualRequest(
     val gedcomId: String? = null,
     val givenName: String? = null,

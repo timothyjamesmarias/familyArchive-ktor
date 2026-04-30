@@ -9,17 +9,23 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("Database")
 
+/**
+ * Holds the DataSource so Koin can provide it to JobRunr and other consumers.
+ */
+lateinit var appDataSource: HikariDataSource
+    private set
+
 fun Application.configureDatabase() {
     val dbUrl = environment.config.property("database.url").getString()
     val dbUser = environment.config.property("database.user").getString()
     val dbPassword = environment.config.property("database.password").getString()
     val maxPoolSize = environment.config.property("database.maxPoolSize").getString().toInt()
 
-    val dataSource = createDataSource(dbUrl, dbUser, dbPassword, maxPoolSize)
+    appDataSource = createDataSource(dbUrl, dbUser, dbPassword, maxPoolSize)
 
-    runMigrations(dataSource)
+    runMigrations(appDataSource)
 
-    Database.connect(dataSource)
+    Database.connect(appDataSource)
     logger.info("Database connected successfully")
 }
 
