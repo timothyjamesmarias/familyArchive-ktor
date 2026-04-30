@@ -1,15 +1,18 @@
 package com.timothymarias.familyarchive.service
 
+import com.timothymarias.familyarchive.model.EventType
 import com.timothymarias.familyarchive.model.FamilyRole
 import com.timothymarias.familyarchive.repository.FamilyMemberRepository
+import com.timothymarias.familyarchive.repository.IndividualEventRepository
 import com.timothymarias.familyarchive.repository.IndividualRecord
 import com.timothymarias.familyarchive.repository.IndividualRepository
+import com.timothymarias.familyarchive.repository.PlaceRepository
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @Serializable
 data class FamilyTreeResponse(
-    val individuals: List<IndividualTreeNode>,
+    val individuals: List<IndividualResponse>,
     val families: List<FamilyUnit>,
 )
 
@@ -22,27 +25,38 @@ data class FamilyUnit(
 
 @Serializable
 data class RelationshipMetadata(
-    val childFamilyIds: List<Long>,
-    val spouseFamilyIds: List<Long>,
-    val hasUnloadedAncestors: Boolean,
-    val hasUnloadedDescendants: Boolean,
-    val hasUnloadedSiblings: Boolean,
-)
+    val childFamilyIds: List<Long> = emptyList(),
+    val spouseFamilyIds: List<Long> = emptyList(),
+    val hasUnloadedAncestors: Boolean = false,
+    val hasUnloadedDescendants: Boolean = false,
+    val hasUnloadedSiblings: Boolean = false,
+) {
+    companion object {
+        fun empty() = RelationshipMetadata()
+    }
+}
 
+/**
+ * API response for an individual — matches the frontend's expected shape.
+ */
 @Serializable
-data class IndividualTreeNode(
+data class IndividualResponse(
     val id: Long,
-    val gedcomId: String?,
-    val givenName: String?,
-    val surname: String?,
-    val sex: Char?,
-    val isTreeRoot: Boolean,
-    val metadata: RelationshipMetadata,
+    val givenName: String? = null,
+    val surname: String? = null,
+    val sex: String? = null,
+    val birthDate: String? = null,
+    val birthPlace: String? = null,
+    val deathDate: String? = null,
+    val deathPlace: String? = null,
+    val relationships: RelationshipMetadata = RelationshipMetadata.empty(),
 )
 
 class FamilyTreeService(
     private val individualRepository: IndividualRepository,
     private val familyMemberRepository: FamilyMemberRepository,
+    private val individualEventRepository: IndividualEventRepository,
+    private val placeRepository: PlaceRepository,
 ) {
     companion object {
         const val PRIMARY_SURNAME = "Marias"
@@ -100,16 +114,8 @@ class FamilyTreeService(
         val families = buildFamilyUnits(allIds.toList(), allIds)
 
         val individualsWithMetadata = allIndividuals.values.map { individual ->
-            val metadata = computeRelationshipMetadata(individual.id, allIds)
-            IndividualTreeNode(
-                id = individual.id,
-                gedcomId = individual.gedcomId,
-                givenName = individual.givenName,
-                surname = individual.surname,
-                sex = individual.sex,
-                isTreeRoot = individual.isTreeRoot,
-                metadata = metadata,
-            )
+            val relationships = computeRelationshipMetadata(individual.id, allIds)
+            toIndividualResponse(individual, relationships)
         }
 
         return FamilyTreeResponse(individuals = individualsWithMetadata, families = families)
@@ -218,5 +224,34 @@ class FamilyTreeService(
     private fun hasUnloadedSiblings(individualId: Long, loadedIds: Set<Long>): Boolean {
         val siblings = individualRepository.findSiblings(individualId)
         return siblings.any { !loadedIds.contains(it.id) }
+    }
+
+    /**
+     * Convert an IndividualRecord to an IndividualResponse with event data.
+     * Used internally and by API routes.
+     */
+    fun toIndividualResponse(
+        individual: IndividualRecord,
+        relationships: RelationshipMetadata = RelationshipMetadata.empty(),
+    ): IndividualResponse {
+        val events = individualEventRepository.findByIndividualId(individual.id)
+
+        val birthEvent = events.firstOrNull { it.eventType == EventType.BIRTH }
+        val deathEvent = events.firstOrNull { it.eventType == EventType.DEATH }
+
+        val birthPlace = birthEvent?.placeId?.let { placeRepository.findById(it)?.name }
+        val deathPlace = deathEvent?.placeId?.let { placeRepository.findById(it)?.name }
+
+        return IndividualResponse(
+            id = individual.id,
+            givenName = individual.givenName,
+            surname = individual.surname,
+            sex = individual.sex?.toString(),
+            birthDate = birthEvent?.dateString,
+            birthPlace = birthPlace,
+            deathDate = deathEvent?.dateString,
+            deathPlace = deathPlace,
+            relationships = relationships,
+        )
     }
 }

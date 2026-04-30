@@ -276,21 +276,7 @@ class FamilyTreeRelationshipService(
 
         return FamilyTreeResponse(
             individuals = allIndividuals.map { individual ->
-                IndividualTreeNode(
-                    id = individual.id,
-                    gedcomId = individual.gedcomId,
-                    givenName = individual.givenName,
-                    surname = individual.surname,
-                    sex = individual.sex,
-                    isTreeRoot = individual.isTreeRoot,
-                    metadata = RelationshipMetadata(
-                        childFamilyIds = emptyList(),
-                        spouseFamilyIds = emptyList(),
-                        hasUnloadedAncestors = false,
-                        hasUnloadedDescendants = false,
-                        hasUnloadedSiblings = false,
-                    ),
-                )
+                familyTreeService.toIndividualResponse(individual)
             },
             families = families,
         )

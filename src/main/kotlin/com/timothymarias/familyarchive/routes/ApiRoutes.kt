@@ -57,7 +57,11 @@ fun Route.apiRoutes() {
                     ),
                 )
                 val individual = individualService.findById(id)
-                call.respond(HttpStatusCode.Created, individual ?: mapOf("id" to id))
+                if (individual != null) {
+                    call.respond(HttpStatusCode.Created, familyTreeService.toIndividualResponse(individual))
+                } else {
+                    call.respond(HttpStatusCode.Created, mapOf("id" to id))
+                }
             }
 
             put("/individuals/{id}") {
@@ -77,7 +81,11 @@ fun Route.apiRoutes() {
                     ),
                 )
                 val individual = individualService.findById(id)
-                call.respond(individual ?: mapOf("id" to id))
+                if (individual != null) {
+                    call.respond(familyTreeService.toIndividualResponse(individual))
+                } else {
+                    call.respond(mapOf("id" to id))
+                }
             }
 
             delete("/individuals/{id}") {
@@ -106,13 +114,13 @@ fun Route.apiRoutes() {
                 if (individual == null) {
                     call.respondText("Not found", status = HttpStatusCode.NotFound)
                 } else {
-                    call.respond(individual)
+                    call.respond(familyTreeService.toIndividualResponse(individual))
                 }
             }
 
             get("/root") {
                 val roots = familyTreeService.getRootIndividuals()
-                call.respond(roots)
+                call.respond(roots.map { familyTreeService.toIndividualResponse(it) })
             }
         }
 
