@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "includes": [
+      {"pattern": "application\\.conf"},
+      {"pattern": "logback\\.xml"},
+      {"pattern": "db/migration/.*\\.sql"},
+      {"pattern": "static/.*"},
+      {"pattern": "META-INF/native-image/.*"},
+      {"pattern": "META-INF/services/.*"},
+      {"pattern": "org/flywaydb/.*"},
+      {"pattern": "org/postgresql/.*"}
+    ]
+  }
+}
