@@ -20,7 +20,8 @@ version = "0.0.1-SNAPSHOT"
 application {
     mainClass.set("com.timothymarias.familyarchive.ApplicationKt")
 
-    val isDevelopment: Boolean = project.ext.has("development")
+    val isDevelopment: Boolean = project.ext.has("development") ||
+        gradle.startParameter.taskNames.any { it.contains("run", ignoreCase = true) }
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
@@ -32,6 +33,13 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("io.insert-koin:koin-core:4.0.4")
+        force("io.insert-koin:koin-core-jvm:4.0.4")
+    }
 }
 
 val ktorVersion = "3.1.3"
@@ -53,6 +61,7 @@ dependencies {
     implementation("io.ktor:ktor-server-host-common:$ktorVersion")
 
     // Koin DI
+    implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
 

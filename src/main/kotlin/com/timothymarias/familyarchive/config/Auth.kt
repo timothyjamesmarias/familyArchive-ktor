@@ -103,7 +103,7 @@ fun Application.configureAuth() {
  */
 fun Application.bootstrapAdminUser() {
     val userService by inject<UserService>()
-    val isDev = environment.config.propertyOrNull("ktor.development")?.getString()?.toBoolean() ?: false
+    val isDev = developmentMode
 
     val adminEmail = System.getenv("ADMIN_EMAIL") ?: "admin@familyarchive.local"
     val adminName = System.getenv("ADMIN_NAME") ?: "Admin User"
