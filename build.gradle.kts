@@ -35,16 +35,9 @@ repositories {
     mavenCentral()
 }
 
-configurations.all {
-    resolutionStrategy {
-        force("io.insert-koin:koin-core:4.0.4")
-        force("io.insert-koin:koin-core-jvm:4.0.4")
-    }
-}
-
 val ktorVersion = "3.1.3"
 val exposedVersion = "0.61.0"
-val koinVersion = "4.0.4"
+val koinVersion = "4.1.1"
 
 dependencies {
     // Ktor server

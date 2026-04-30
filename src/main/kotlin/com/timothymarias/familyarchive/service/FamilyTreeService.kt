@@ -4,19 +4,23 @@ import com.timothymarias.familyarchive.model.FamilyRole
 import com.timothymarias.familyarchive.repository.FamilyMemberRepository
 import com.timothymarias.familyarchive.repository.IndividualRecord
 import com.timothymarias.familyarchive.repository.IndividualRepository
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.transactions.transaction
 
+@Serializable
 data class FamilyTreeResponse(
     val individuals: List<IndividualTreeNode>,
     val families: List<FamilyUnit>,
 )
 
+@Serializable
 data class FamilyUnit(
     val familyId: Long,
     val parentIds: List<Long>,
     val childIds: List<Long>,
 )
 
+@Serializable
 data class RelationshipMetadata(
     val childFamilyIds: List<Long>,
     val spouseFamilyIds: List<Long>,
@@ -25,6 +29,7 @@ data class RelationshipMetadata(
     val hasUnloadedSiblings: Boolean,
 )
 
+@Serializable
 data class IndividualTreeNode(
     val id: Long,
     val gedcomId: String?,
