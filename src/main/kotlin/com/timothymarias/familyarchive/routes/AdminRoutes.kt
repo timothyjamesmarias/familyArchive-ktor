@@ -12,6 +12,8 @@ import com.timothymarias.familyarchive.service.FamilyService
 import com.timothymarias.familyarchive.service.FileUpload
 import com.timothymarias.familyarchive.service.IndividualEventService
 import com.timothymarias.familyarchive.service.IndividualService
+import com.timothymarias.familyarchive.service.AnnotationService
+import com.timothymarias.familyarchive.service.GedcomImportJobService
 import com.timothymarias.familyarchive.service.PlaceService
 import com.timothymarias.familyarchive.service.UserService
 import com.timothymarias.familyarchive.views.AdminViewContext
@@ -48,6 +50,10 @@ fun Route.adminRoutes(isDevMode: Boolean, tinymceApiKey: String) {
     val artifactUploadService by inject<ArtifactUploadService>()
     val artifactFileService by inject<ArtifactFileService>()
     val articleService by inject<ArticleService>()
+    val annotationService by inject<AnnotationService>()
+    val gedcomImportJobService: GedcomImportJobService? = try {
+        org.koin.java.KoinJavaComponent.getKoin().getOrNull()
+    } catch (_: Exception) { null }
 
     route("/admin") {
         // Dashboard
@@ -595,6 +601,161 @@ fun Route.adminRoutes(isDevMode: Boolean, tinymceApiKey: String) {
                 val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/families")
                 familyService.delete(id)
                 call.redirectWithFlash("/admin/families", "success", "Family deleted")
+            }
+        }
+
+        // ---- GEDCOM Import ----
+        route("/gedcom") {
+            get("/import") {
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminGedcomImportViews.importForm(ctx),
+                    ContentType.Text.Html,
+                )
+            }
+
+            post("/import") {
+                if (gedcomImportJobService == null) {
+                    call.redirectWithFlash("/admin/gedcom/import", "error", "Job scheduler not available")
+                    return@post
+                }
+
+                val multipart = call.receiveMultipart()
+                var fileBytes: ByteArray? = null
+                var fileName = "unknown"
+
+                multipart.forEachPart { part ->
+                    when (part) {
+                        is PartData.FileItem -> {
+                            fileName = part.originalFileName ?: "unknown"
+                            val channel = part.provider()
+                            fileBytes = channel.readRemaining().readByteArray()
+                        }
+                        else -> {}
+                    }
+                    part.dispose()
+                }
+
+                if (fileBytes == null || fileBytes!!.isEmpty()) {
+                    call.redirectWithFlash("/admin/gedcom/import", "error", "Please select a GEDCOM file to import")
+                    return@post
+                }
+
+                if (!fileName.endsWith(".ged", ignoreCase = true)) {
+                    call.redirectWithFlash("/admin/gedcom/import", "error", "Please upload a valid GEDCOM file (.ged)")
+                    return@post
+                }
+
+                try {
+                    val tempFile = java.nio.file.Files.createTempFile("gedcom-import-", ".ged").toFile()
+                    tempFile.writeBytes(fileBytes!!)
+
+                    val jobId = gedcomImportJobService.enqueueImport(tempFile.absolutePath)
+                    call.redirectWithFlash(
+                        "/admin/gedcom/import",
+                        "success",
+                        "GEDCOM import started! Job ID: $jobId. Check the Jobs dashboard to monitor progress.",
+                    )
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/gedcom/import", "error", "Import failed: ${e.message}")
+                }
+            }
+        }
+
+        // ---- Artifact Type Sub-Routes ----
+        route("/artifacts/{type}") {
+            get {
+                val typeStr = call.parameters["type"] ?: return@get call.respondRedirect("/admin/artifacts")
+                val artifactType = try {
+                    ArtifactType.fromRouteSegment(typeStr)
+                } catch (e: Exception) {
+                    return@get call.respondRedirect("/admin/artifacts")
+                }
+                val page = call.parameters["page"]?.toIntOrNull() ?: 0
+                val size = call.parameters["size"]?.toIntOrNull() ?: 20
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val artifacts = artifactService.findByType(artifactType, PageRequest(page, size))
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminArtifactTypeViews.index(
+                        ctx, artifacts.content, artifactType.displayName, artifactType.routeSegment,
+                    ),
+                    ContentType.Text.Html,
+                )
+            }
+
+            get("/{id}/edit") {
+                val typeStr = call.parameters["type"] ?: return@get call.respondRedirect("/admin/artifacts")
+                val artifactType = try {
+                    ArtifactType.fromRouteSegment(typeStr)
+                } catch (e: Exception) {
+                    return@get call.respondRedirect("/admin/artifacts")
+                }
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@get call.respondRedirect("/admin/artifacts/$typeStr")
+                val artifact = artifactService.findById(id) ?: return@get call.respondRedirect("/admin/artifacts/$typeStr")
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminArtifactTypeViews.edit(
+                        ctx, artifact, artifactType.displayName, artifactType.routeSegment, ArtifactType.entries,
+                    ),
+                    ContentType.Text.Html,
+                )
+            }
+
+            post("/{id}") {
+                val typeStr = call.parameters["type"] ?: return@post call.respondRedirect("/admin/artifacts")
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/artifacts/$typeStr")
+                val params = call.receiveParameters()
+                try {
+                    artifactService.update(
+                        id = id,
+                        title = params["title"],
+                        artifactType = ArtifactType.fromString(params["artifactType"] ?: "DOCUMENT"),
+                        originalDateString = params["originalDateString"],
+                    )
+                    call.redirectWithFlash("/admin/artifacts/$typeStr/$id/edit", "success", "Artifact updated")
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/artifacts/$typeStr/$id/edit", "error", e.message ?: "Update failed")
+                }
+            }
+
+            post("/{id}/delete") {
+                val typeStr = call.parameters["type"] ?: return@post call.respondRedirect("/admin/artifacts")
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/artifacts/$typeStr")
+                artifactService.delete(id)
+                call.redirectWithFlash("/admin/artifacts/$typeStr", "success", "Artifact deleted")
+            }
+
+            post("/{id}/files/{fileId}/delete") {
+                val typeStr = call.parameters["type"] ?: return@post call.respondRedirect("/admin/artifacts")
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/artifacts/$typeStr")
+                val fileId = call.parameters["fileId"]?.toLongOrNull() ?: return@post call.respondRedirect("/admin/artifacts/$typeStr/$id/edit")
+                try {
+                    artifactService.deleteArtifactFile(id, fileId)
+                    call.redirectWithFlash("/admin/artifacts/$typeStr/$id/edit", "success", "File deleted")
+                } catch (e: Exception) {
+                    call.redirectWithFlash("/admin/artifacts/$typeStr/$id/edit", "error", e.message ?: "Failed to delete file")
+                }
+            }
+
+            get("/{id}/annotations") {
+                val typeStr = call.parameters["type"] ?: return@get call.respondRedirect("/admin/artifacts")
+                val artifactType = try {
+                    ArtifactType.fromRouteSegment(typeStr)
+                } catch (e: Exception) {
+                    return@get call.respondRedirect("/admin/artifacts")
+                }
+                val id = call.parameters["id"]?.toLongOrNull() ?: return@get call.respondRedirect("/admin/artifacts/$typeStr")
+                val artifact = artifactService.findById(id) ?: return@get call.respondRedirect("/admin/artifacts/$typeStr")
+                val ctx = call.adminViewContext(isDevMode, tinymceApiKey)
+                val annotationsByFileId = artifact.files.associate { file ->
+                    file.id to annotationService.findByArtifactFileId(file.id)
+                }
+                call.respondText(
+                    com.timothymarias.familyarchive.views.admin.AdminArtifactTypeViews.annotations(
+                        ctx, artifact, artifactType.displayName, artifactType.routeSegment, annotationsByFileId,
+                    ),
+                    ContentType.Text.Html,
+                )
             }
         }
 

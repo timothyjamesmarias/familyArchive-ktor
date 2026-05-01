@@ -80,6 +80,9 @@ ADMIN_ROUTES=(
     "/admin/individuals/new"
     "/admin/families"
     "/admin/families/new"
+    "/admin/gedcom/import"
+    "/admin/artifacts/photos"
+    "/admin/artifacts/documents"
     "/admin/system/utilities"
 )
 

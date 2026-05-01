@@ -9,7 +9,7 @@ import com.timothymarias.familyarchive.config.configureRouting
 import com.timothymarias.familyarchive.config.configureSerialization
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
-import io.ktor.server.netty.EngineMain
+import io.ktor.server.cio.EngineMain
 import io.ktor.server.plugins.autohead.AutoHeadResponse
 import io.ktor.server.plugins.calllogging.CallLogging
 import org.slf4j.event.Level

@@ -9,6 +9,7 @@ plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.serialization") version "2.2.21"
     id("io.ktor.plugin") version "3.1.3"
+    id("org.graalvm.buildtools.native") version "0.10.6"
     id("com.github.node-gradle.node") version "7.1.0"
     id("org.flywaydb.flyway") version "11.14.1"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
@@ -40,9 +41,9 @@ val exposedVersion = "0.61.0"
 val koinVersion = "4.1.1"
 
 dependencies {
-    // Ktor server
+    // Ktor server (CIO engine required for GraalVM native image)
     implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
@@ -190,5 +191,31 @@ configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
+}
+
+// GraalVM native image configuration
+graalvmNative {
+    binaries {
+        named("main") {
+            fallback.set(false)
+            verbose.set(true)
+            imageName.set("familyarchive")
+
+            buildArgs.addAll(
+                "--initialize-at-build-time=ch.qos.logback",
+                "--initialize-at-build-time=io.ktor",
+                "--initialize-at-build-time=kotlin",
+                "--initialize-at-build-time=kotlinx",
+                "--initialize-at-build-time=org.slf4j",
+                "--initialize-at-build-time=org.xml.sax.helpers.LocatorImpl",
+                "--initialize-at-build-time=org.xml.sax.helpers.AttributesImpl",
+                "--initialize-at-build-time=org.apache.xerces",
+                "--initialize-at-run-time=io.netty",
+                "-H:+InstallExitHandlers",
+                "-H:+ReportUnsupportedElementsAtRuntime",
+                "-H:+ReportExceptionStackTraces",
+            )
+        }
     }
 }
